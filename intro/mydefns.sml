@@ -1,8 +1,10 @@
 (* This is the contents of the file
-   ~cs251/download/sml/intro/mydefns.sml on cs.wellesley.edu and   
-   /home/wx/cs251/sml/intro/mydefns.sml on the wx appliance.
+     /home/u/cs251/sml/intro/mydefns.sml on the csenv appliance.
+   It can also be found on cs.wellesley.edu in 
+     ~cs251/download/sml/intro/mydefns.sml 
+  It defines integers a and b and functions named sq, sos, and fact.
   (* By the way, comments nest properly in SML! *)   
-  It defines integers a and b and functions named sq, sos, and fact *)
+*)
 
 val a = 2 + 3
 val b = 2 * a
