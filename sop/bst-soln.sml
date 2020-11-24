@@ -16,10 +16,12 @@ fun listToTree xs = foldl (fn (x,t) => insert x t) Leaf xs
 fun member x Leaf = false
   | member x (Node(l,v,r)) = (x = v) orelse member x l orelse member x r
 
-(* Test cases *)								     
+(* Test cases *)							
 
-val test_bst = listToTree [4,2,3,6,1,7,5];
+val testBst = listToTree [9,4,2,7,14,12,17];
 
-val test_member = map (fn i => (i, member i test_bst)) [0,1,2,3,4,5,6,7,8]
+val testMember = map (fn i => (i, member i testBst)) 
+		     [0,1,2,3,4,5,6,7,8,9,
+		      10,11,12,13,14,15,16,17,18,19]
 
 
