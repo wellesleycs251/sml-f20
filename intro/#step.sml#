@@ -6,4 +6,4 @@ fun stepUntil ((a,b), limit) = (* no looping constructs in ML; *)
   else
       stepUntil (step(a,b), limit)
 
-fun step (a,b) = (a+b, a*b)		
+and step (a,b) = (a+b, a*b)		

@@ -5,9 +5,14 @@ use "bintree-soln.sml";
 
 fun singleton v = Node(Leaf, v, Leaf)
 
-fun insert x Leaf = Leaf (* replace this stub *)
+fun insert x Leaf = singleton x (* replace this stub *)
   | insert x (t as (Node(l,v,r))) =
-    Leaf (* replace this stub *)
+    if x = v then
+	t
+    else if x < v then
+	Node(insert x v, v, r)
+    else
+	Node(l, v, insert v r)
 
 fun listToTree xs = (* Hint: use foldl *)
     Leaf (* replace this stub *)

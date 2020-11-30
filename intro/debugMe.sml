@@ -11,7 +11,7 @@
     val it = 11 : int
 *)
 fun sumListRec [] = 0
-  | sumListRec (n,ns) = n + (sumList ns)
+  | sumListRec (n::ns) = n + (sumListRec ns)
    
 (* 
     val prodListRec = fn : int list -> int
@@ -22,6 +22,8 @@ fun sumListRec [] = 0
 *)
 fun prodListRec [] = 1
   | prodListRec n::ns  = n * (prodList ns)
+
+(*				 
 
 (*
     val myZip = fn : 'a list * 'b list -> ('a * 'b) list
@@ -78,3 +80,4 @@ fun dotProduct xs ys =
 	  (map (fn [x,y] => x*y)
 	       ListPair.zip(xs,ys))
 
+*)
