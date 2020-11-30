@@ -14,7 +14,7 @@ fun insert x Leaf = singleton x (* replace this stub *)
     else
 	Node(l, v, insert v r)
 
-fun listToTree xs = (* Hint: use foldl *)
+fun listToBst xs = (* Hint: use foldl *)
     Leaf (* replace this stub *)
 
 fun member x Leaf = false
@@ -22,12 +22,9 @@ fun member x Leaf = false
     
 (* Test cases *)
 
-(*
-val testBst = listToTree [9,4,2,7,14,12,17];
-*)
+val testBst = listToBst [9,4,2,7,14,12,17];
 
-(*
 val testMember = map (fn i => (i, member i testBst)) 
 		     [0,1,2,3,4,5,6,7,8,9,
 		      10,11,12,13,14,15,16,17,18,19]
-*)
+
