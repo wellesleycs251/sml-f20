@@ -23,10 +23,10 @@ exception Unimplementable (* Impossible to implement *)
 signature SET =
 sig
     (* The type of sets *)
-    type ''a t
+    type ''a t 
 
     (* An empty set *)
-    val empty : ''a t 
+    val empty : ''a t
 
     (* Construct a single-element set from that element. *)
     val singleton : ''a -> ''a t
@@ -56,7 +56,7 @@ sig
 
     (* Construct the difference of two sets
        (all elements in the first set but not in the second.) *)
-    val difference : ''a t -> ''a t -> ''a t					     
+    val difference : ''a t -> ''a t -> ''a t
 
     (* Construct a set from a list of elements.
        Do not assume the list elements are unique. *)
@@ -83,15 +83,15 @@ sig
     (* Convert a set to a string representation, given a function
        that converts a set element into a string representation. *)
     val toString : (''a -> string) -> ''a t -> string
-			      
+
 end
 
-
 (* Implement a SET ADT using lists to represent sets. *)
-structure ListSet :> SET = struct
+structure ListSet (* :> SET *) = struct
+
+    (* Invariant: the list does not contain duplicates. No ordering is implied *)
 
     (* Sets are represented by lists. *)
-    (* Invariant: We use unordered lists without duplicates *)
     type ''a t = ''a list
 
     (* The empty set is the empty list. *)
@@ -100,53 +100,53 @@ structure ListSet :> SET = struct
     (* complete this structure by replacing "raise Unimplemented"
        with implementations of each function *)
     fun singleton x = [x]
-			    
-    fun isEmpty [] = true
-      | isEmpty _  = false
-      
-    fun size xs = length xs
-		       
-    fun member x ys = List.exists (fn y => y=x) ys
-			 
-    fun insert x ys = if not (member x ys) then x::ys else ys
-      
-    fun delete x ys = List.filter (fn y => y <> x) ys
-    fun union xs ys = foldr (fn (x, zs) => insert x zs) ys xs 
-    (* fun union xs ys = foldr insert ys xs *)
-    (* (fun union xs ys = (List.filter (fn x => not (member x ys)) xs) @ ys *)
-      
-    fun intersection _ = raise Unimplemented
-    fun difference _ = raise Unimplemented
-			     
-    fun fromList xs = foldl (fn (x,set) => insert x set) empty xs
-			   
-    fun toList xs = xs
-			 
-    fun fromPred _ = raise Unimplementable (* impossible to implement! *)
-    fun toPred _ = raise Unimplemented
-    fun toString _ = raise Unimplemented
 
+    fun isEmpty xs = null xs
+			  
+    fun size xs = length xs
+			 
+    fun member x ys = List.exists (fn y => x = y) ys
+
+    fun insert x ys = if member x ys then ys else x :: ys			
+
+    fun delete x ys = List.filter (fn y => x <> y) ys
+
+    (* Like fromList, use insert to avoid dups, but start with ys, not empty *)
+    (* fun union xs ys = foldl (fn (x,set) => insert x set) ys xs *)
+    fun union xs ys = xs @ (List.filter (fn y => not (member y xs)) ys)
+				  
+    fun intersection xs ys = List.filter (fn x => member x ys) xs
+				   
+    fun difference xs ys = List.filter (fn x => not (member x ys)) xs				  
+
+    (* Use repeated insert to remove duplicates *) 			    
+    fun fromList xs = foldl (fn (x,set) => insert x set) empty xs
+
+    fun toList xs = xs
+
+    fun fromPred _ = raise Unimplementable (* impossible to implement! *)
+			   
+    fun toPred xs = fn x => member x xs
+			 
+    fun toString eltToString xs = "{" ^ (String.concatWith "," (map eltToString xs)) ^ "}"
+			     
 end
                                
 (* Tests Cases -- add more of your own *)
-(*
-val test = ListSet.union
+
+val testSet = ListSet.union
                (ListSet.fromList [1,2,3])
                (ListSet.fromList [3,4,5])
-val str  = ListSet.toString Int.toString test
-val mem0 = ListSet.member 0 test
-val mem1 = ListSet.member 1 test
-val mem2 = ListSet.member 2 test
-val mem3 = ListSet.member 3 test
-val mem4 = ListSet.member 4 test
-val mem5 = ListSet.member 5 test
-val mem6 = ListSet.member 6 test
-val ints = ListSet.toString Int.toString
+val strSet  = ListSet.toList testSet
+val memberTests = map (fn i => (i, ListSet.member i testSet)) [0,1,2,3,4,5,6]
+			  
+val ints = ListSet.toList
                (ListSet.intersection
                    (ListSet.fromList [1,2,3])
                    (ListSet.fromList [3,4,5]))
-val diff = ListSet.toString Int.toString
+
+val diff = ListSet.toList
                (ListSet.difference
                     (ListSet.fromList [1,2,3])
                     (ListSet.fromList [3,4,5]))
-*)
+

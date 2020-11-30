@@ -25,7 +25,7 @@ end
    cannot be violated by external code.
 
    This is a true Abstract Data Type. *)
-signature RATIONAL =
+signature RATIONAL_ABSTRACT =
 sig
     type rational (* type now abstract *)
     exception BadFrac
@@ -38,7 +38,7 @@ end
    function since no value breaks our invariants, and different
    implementations can still implement Whole differently. 
    Clients know only that Whole is a function.
-   Cannot use as pattern. *)
+   Cannot use it as a pattern. *)
 signature RATIONAL_WHOLE =
 sig
     type rational (* type still abstract *)
@@ -49,9 +49,20 @@ sig
     val toString : rational -> string
 end 
 
-(* Can ascribe any of the 3 signatures above.  We choose to use the
-   Abstract Data Type. *)
-structure Rational :> RATIONAL = 
+(* RationalReduced is an implementation of rational numbers satisfying
+   the following two invariants: 
+   
+   1. The denominator is always positive. E.g., never Frac(2,~3) 
+      or Frac(~2,~3) but instead Frac(~2,3) or Frac(2,3)
+
+   2. The numerator/denominator pair is always in reduced form, 
+      and Whole is used when appropriate. 
+      E.g., never Frac(6,4) but instead Frac(3,2);
+            never Frac(6,3) but instead Whole(2).
+
+Can nascribe any of the 3 signatures above.  
+   As a default, we choose to use the abstract data type RATIONAL_ABSTRACT *)
+structure RationalReduced :> RATIONAL_ABSTRACT (* or RATIONAL_WHOLE *) = 
 struct
 
   (* Invariant 1: all denominators > 0
@@ -103,14 +114,15 @@ struct
                                                     
 end
     
+(*  This implementation of rational keeps them in unreduced form until 
+    they are printed. 
 
-(* This structure can have all three signatures we gave
-   Rational, and/but it is *equivalent* under signatures 
-   RATIONAL and RATIONAL_WHOLE.
-
-   This structure does not reduce fractions until printing.
+    This structure can have all three signatures we gave RationalReduced, 
+    and, but behaviorally it is *equivalent* to RationalReduced under 
+    signatures RATIONAL_ABSTRACT and RATIONAL_WHOLE.
  *)
-structure UnreducedRational :> RATIONAL (* or the others *) =
+structure RationalUnreduced :> RATIONAL_ABSTRACT 
+     (* or RATIONAL_CONCRETE or RATIONAL_WHOLE *) =
 struct
     datatype rational = Whole of int | Frac of int*int
     exception BadFrac
@@ -127,6 +139,8 @@ struct
       | add (Frac (a,b), Frac (c,d)) = Frac (a*d + b*c, b*d)
                                          
     fun toString r =
+        (* In this implementation, gcd and reduce performed only on
+           conversion to a string. *)
         let fun gcd (x,y) =
                 if x=y
                 then x
@@ -157,8 +171,9 @@ end
 (* This structure uses a different concrete representation of the
    abstract type.  We cannot ascribe signature RATIONAL_CONCRETE to
    it.  To ascribe RATIONAL_WHOLE, we must add a Whole function.  It
-   is indistinguishable from Rational under these two signatures. *)
-structure PairRational :> RATIONAL (* or RATIONAL_WHOLE *)= struct 
+   is indistinguishable from RationalReduced under these two signatures. *)
+structure RationalPair :> RATIONAL_ABSTRACT (* or RATIONAL_WHOLE *) = 
+struct 
     type rational = int * int
     exception BadFrac
                   
@@ -168,7 +183,8 @@ structure PairRational :> RATIONAL (* or RATIONAL_WHOLE *)= struct
         then (~x,~y)
         else (x,y)
                  
-    fun Whole i = (i,1)
+    (* Supply Whole function to satisfy spec, but not used internally *)
+    fun Whole i = (i,1) 
                       
     fun add ((a,b),(c,d)) = (a*d + c*b, b*d)
                                 
