@@ -23,10 +23,10 @@ exception Unimplementable (* Impossible to implement *)
 signature SET =
 sig
     (* The type of sets *)
-    type ''a t
+    type ''a t 
 
     (* An empty set *)
-    val empty : ''a t 
+    val empty : ''a t
 
     (* Construct a single-element set from that element. *)
     val singleton : ''a -> ''a t
@@ -54,9 +54,8 @@ sig
     (* Construct the intersection of two sets. *)
     val intersection : ''a t -> ''a t -> ''a t
 
-    (* Construct the difference of two sets
-       (all elements in the first set but not in the second.) *)
-    val difference : ''a t -> ''a t -> ''a t					     
+    (* Construct the symmetric difference of two sets. *)
+    val difference : ''a t -> ''a t -> ''a t
 
     (* Construct a set from a list of elements.
        Do not assume the list elements are unique. *)
@@ -83,52 +82,63 @@ sig
     (* Convert a set to a string representation, given a function
        that converts a set element into a string representation. *)
     val toString : (''a -> string) -> ''a t -> string
-			      
+
 end
 
-
 (* Implement a SET ADT using lists to represent sets. *)
-structure ListSet :> SET = struct
+structure ListSetDups :> SET = struct
+
+    (* Invariant: the list does not contain duplicates. No ordering is implied *)
 
     (* Sets are represented by lists. *)
-    (* Invariant: We use unordered lists without duplicates *)
     type ''a t = ''a list
 
     (* The empty set is the empty list. *)
-    val empty = [] 
+    val empty = []
 
     (* complete this structure by replacing "raise Unimplemented"
        with implementations of each function *)
-    fun singleton x = raise Unimplemented
-			    
-    fun isEmpty xs = raise Unimplemented
-      
-    fun size xs = raise Unimplemented
-		       
-    fun member x ys = raise Unimplemented
-			 
-    fun insert x ys = raise Unimplemented
-      
-    fun delete x ys = raise Unimplemented
-    fun union xs ys = raise Unimplemented
-    fun intersection xs ys = raise Unimplemented
-    fun difference xs ys = raise Unimplemented
-			     
-    fun fromList xs = raise Unimplemented
-			   
-    fun toList xs = raise Unimplemented
-			 
-    fun fromPred pred = raise Unimplementable (* impossible to implement! *)
-    fun toPred xs = raise Unimplemented
-    fun toString eltToString xs = raise Unimplemented
+    fun singleton x = [x]
 
+    fun isEmpty xs = null xs
+			  
+    fun member x ys = List.exists (fn y => x = y) ys
+
+    (* Helper function to remove duplicates from a list of elements *)
+    fun removeDups xs = foldr (fn (x, set) => if member x set then set else x::set)
+			      [] 
+			      xs
+
+    fun insert x ys = x :: ys			
+
+    fun delete x ys = List.filter (fn y => x <> y) ys
+
+    (* Like listToSet, use insert to avoid dups, but start with ys, not empty *)
+    (* fun union xs ys = foldl (fn (x,set) => insert x set) ys xs *)
+    fun union xs ys = xs @ ys
+				  
+    fun intersection xs ys = List.filter (fn x => member x ys) xs
+				   
+    fun difference xs ys = List.filter (fn x => not (member x ys)) xs				  
+
+    fun fromList xs = xs
+
+    fun size xs = length (removeDups xs)
+
+    fun toList xs = (removeDups xs)
+
+    fun fromPred _ = raise Unimplementable (* impossible to implement! *)
+			   
+    fun toPred xs = fn x => member x xs
+			 
+    fun toString eltToString xs = 
+	"{" ^ (String.concatWith "," (map eltToString (toList xs))) ^ "}"
+			     
 end
 
 (* Some tests cases. Can add more of your own *)
 
-(*
-
-open ListSet;
+open ListSetDups;
 
 val s1 = insert 1 (insert 2 (insert 3 empty)) (* {1,2,3} *)
 
@@ -171,4 +181,4 @@ fun testToPred set = let val pred = toPred set
 
 val toPredTests = testSetFunction testToPred
 
-*)
+

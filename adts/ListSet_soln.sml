@@ -1,5 +1,4 @@
 (* CS 251 Set ADT exercises.
-
    Complete the list-based representation of the SET signature.
    Represent a set as an unordered list of elements without duplicates. 
 
@@ -87,7 +86,7 @@ sig
 end
 
 (* Implement a SET ADT using lists to represent sets. *)
-structure ListSet (* :> SET *) = struct
+structure ListSet :> SET = struct
 
     (* Invariant: the list does not contain duplicates. No ordering is implied *)
 
@@ -101,7 +100,7 @@ structure ListSet (* :> SET *) = struct
        with implementations of each function *)
     fun singleton x = [x]
 
-    fun isEmpty xs = null xs
+    fun isEmpty xs = null xs (* or x = [] *)
 			  
     fun size xs = length xs
 			 
@@ -111,16 +110,39 @@ structure ListSet (* :> SET *) = struct
 
     fun delete x ys = List.filter (fn y => x <> y) ys
 
-    (* Like fromList, use insert to avoid dups, but start with ys, not empty *)
-    (* fun union xs ys = foldl (fn (x,set) => insert x set) ys xs *)
-    fun union xs ys = xs @ (List.filter (fn y => not (member y xs)) ys)
-				  
+    fun union xs ys = 
+	(* One strategy for union is to start with the foldr from fromList, 
+           and adapt it to use ys as nullval and insert all xs *)
+	foldr (fn (x,setSoFar) => insert x setSoFar) ys xs
+
+        (* Another strategy for union is to append to xs all values
+           from ys that are not in xs:
+
+               xs @ (List.filter (fn y => not (member y xs)) ys)
+
+         *)
+ 
     fun intersection xs ys = List.filter (fn x => member x ys) xs
 				   
     fun difference xs ys = List.filter (fn x => not (member x ys)) xs				  
 
-    (* Use repeated insert to remove duplicates *) 			    
-    fun fromList xs = foldl (fn (x,set) => insert x set) empty xs
+    fun fromList xs = foldr (fn (x, set) => insert x set) empty xs
+	(* Can use repeated insert via foldr or foldl to remove duplicates.
+           foldr will insert the elements back to front while 
+           foldl will insert the elements from front to back, 
+           so element order may differ (but it's irrelevant). 
+
+           Note: Can't just use insert as combiner because insert takes
+                 curried args, and combiner must have tupled args. 
+                 Alternatively, we could define uncurry2 as
+
+                     fun uncurry2 curriedFun (x,y) = curriedFun x y
+
+                 and then use
+
+                     foldr (uncurry2 insert) empty xs
+  
+          *)
 
     fun toList xs = xs
 
@@ -128,25 +150,54 @@ structure ListSet (* :> SET *) = struct
 			   
     fun toPred xs = fn x => member x xs
 			 
-    fun toString eltToString xs = "{" ^ (String.concatWith "," (map eltToString xs)) ^ "}"
+    fun toString eltToString xs = 
+	"{" ^ (String.concatWith "," (map eltToString xs)) ^ "}"
 			     
 end
                                
-(* Tests Cases -- add more of your own *)
+(* Some tests cases. Can add more of your own *)
 
-val testSet = ListSet.union
-               (ListSet.fromList [1,2,3])
-               (ListSet.fromList [3,4,5])
-val strSet  = ListSet.toList testSet
-val memberTests = map (fn i => (i, ListSet.member i testSet)) [0,1,2,3,4,5,6]
-			  
-val ints = ListSet.toList
-               (ListSet.intersection
-                   (ListSet.fromList [1,2,3])
-                   (ListSet.fromList [3,4,5]))
+open ListSet;
 
-val diff = ListSet.toList
-               (ListSet.difference
-                    (ListSet.fromList [1,2,3])
-                    (ListSet.fromList [3,4,5]))
+val s1 = insert 1 (insert 2 (insert 3 empty)) (* {1,2,3} *)
+
+val s2 = insert 2 (insert 4 (insert 1 s1)) (* {1,2,3,4} *)
+
+val s3 = fromList [3,4,5,6,7]; (* {3,4,5,6,7} *)
+
+val delSet = delete 8 (delete 6 (delete 4 s3))
+
+val unionSet = union s2 s3
+
+val isectSet = intersection s2 s3
+
+val diffSet = difference s3 s2
+
+val namedSets = [("empty", empty), ("s1", s1), ("s2", s2), ("s3", s3),
+		 ("delSet", delSet), ("unionSet", unionSet), 
+		 ("isectSect", isectSet), ("diffSet", diffSet)]
+
+fun testSetFunction setFun = map (fn (name,set) => (name, setFun set)) 
+				 namedSets
+
+val toListTests = testSetFunction toList
+
+val sizeTests = testSetFunction size
+
+val isEmptyTests = testSetFunction isEmpty
+
+val toStringTests = testSetFunction (toString Int.toString)
+
+fun testMember set = map (fn i => (i, member i set))
+			 [0,1,2,3,4,5,6,7,8]
+
+val memberTests = testSetFunction testMember
+
+fun testToPred set = let val pred = toPred set 
+		     in map (fn i => (i, pred i))
+			    [0,1,2,3,4,5,6,7,8]
+		     end
+
+val toPredTests = testSetFunction testToPred
+
 
