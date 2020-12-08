@@ -52,18 +52,18 @@ structure PostFix = struct
   (* Perform command on given stack and return resulting stack *)	
   and execCmd (Int i) vs = (IntVal i) :: vs
     | execCmd (Seq cmds) vs = (SeqVal cmds) :: vs
-    | execCmd Pop (v :: vs) = vs
+    | execCmd Pop (_ :: vs) = vs
     | execCmd Swap (v1 :: v2 :: vs) = v2 :: v1 :: vs
     | execCmd Nget (stk as (IntVal index) :: vs) =
       if index <= 0 orelse index > List.length(vs) then
 	  raise ConfigError("Invalid index", Nget, stk)
       else
-	  (case List.nth(vs, index-1) of
+	  (case List.nth(stk, index) of
  	       (v as IntVal(_)) => v :: vs
-             | SeqVal(_) => raise ConfigError("Nget can't get a command sequence",
-					      Nget, stk))
-    | execCmd Sel (v_else :: v_then :: (IntVal v_test) :: vs) =
-      (if v_test = 0 then v_else else v_then) :: vs
+	        | SeqVal(_) => raise ConfigError("Nget can't get a command sequence",
+						 Nget, stk))
+    | execCmd Sel (v_else :: v_then :: (IntVal i_test) :: vs) =
+      (if i_test = 0 then v_else else v_then) :: vs
     | execCmd Exec ((SeqVal cmds) :: vs) = execCmds cmds vs
     | execCmd (Arithop a) ((IntVal i1) :: (IntVal i2) :: vs)
       = (IntVal ((arithopToFun a)(i2, i1)) ) :: vs
