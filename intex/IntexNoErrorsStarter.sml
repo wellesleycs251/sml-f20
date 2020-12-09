@@ -27,14 +27,22 @@ val divRem = Intex(5, BinApp(Add,
  Intex Interpreter
  *****************************************************************************)
 
+(* val run: Intex.pgm -> int list -> int *)
 fun run (Intex(numargs, exp)) args =
   17
 
+(* val eval: Intex.exp -> int list -> int *)
 and eval (Int i) args = 17
   | eval (Arg index) args = 17
   | eval (BinApp(binop, exp1, exp2)) args =
       17
 
+(*   val binopToFun: Intex.binop -> int * int -> int 
+
+   Recall -> is *right* associative, so this is equivalen to:
+
+     val binopToFun: Intex.binop -> (int * int -> int)
+ *)
 and binopToFun Add = op+
   | binopToFun Mul = op*
   | binopToFun Sub = op-
@@ -121,6 +129,7 @@ end
  Testing with Sum-of-Product programs
  *****************************************************************************)
 
+(* open Intex structure when loading so all functions available unqualified *)
 open Intex
 
 val sqrTest = run sqr [5]
@@ -128,8 +137,7 @@ val avgTest = run avg [5,15]
 (*
 val f2cTests = map (fn temp => (temp, run f2c temp)) 
                    [[~40], [0], [32], [86], [98], [212]] 
-*)
-
+ *)
 
 (*****************************************************************************
  Testing with S-Expression programs 
