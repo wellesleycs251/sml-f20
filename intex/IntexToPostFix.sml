@@ -8,6 +8,10 @@ structure IntexToPostFix =
 
 struct
 
+(*****************************************************************************
+ Intex to PostFix compiler
+ *****************************************************************************)
+
 (* intexToPostFix: Intex.pgm -> PostFix.pgm *)
 fun intexToPostFix (Intex.Intex(numargs, exp)) =
   PostFix.PostFix(numargs, expToCmds exp 0)
@@ -34,6 +38,10 @@ fun translateString intexPgmString =
   PostFix.pgmToString (intexToPostFix (Intex.stringToPgm intexPgmString))
 
 end
+
+(*****************************************************************************
+ Testing the Intex to PostFix compiler
+ *****************************************************************************)
 
 (* Open these so we can use their values without qualified names. 
    Note that Int will mean Intex.Int, Add will mean Intex.Add, 
@@ -118,6 +126,6 @@ val pfF2c = intexToPostFix(f2c)
 val msg23 = "pfF2c as an sexp string:"
 val pfF2cString = PostFix.pgmToString(pfF2c)
 
-val msg24 = "testing: val val pfF2cTest = PostFix.run pfF2c [86]"
+val msg24 = "testing: val pfF2cTest = PostFix.run pfF2c [86]"
 val pfF2cTest = PostFix.run pfF2c [86]
 
