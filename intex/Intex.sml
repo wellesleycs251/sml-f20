@@ -144,7 +144,6 @@ end
  Testing with Sum-of-Product programs
  *****************************************************************************)
 
-(* open Intex structure when loading so all functions available unqualified *)
 open Intex
 
 val sqrTest = run sqr [5]
