@@ -39,7 +39,11 @@ fun readLineFromConsole () =  Option.valOf (TextIO.inputLine TextIO.stdIn)
 
 fun println s = print (s^"\n")
 
-fun listMember elt xs = List.exists (fn x => x = elt) xs		      
+fun listMember elt xs = List.exists (fn x => x = elt) xs
+
+fun intsToString ints = "[" ^ (String.concatWith
+			           ","
+			           (List.map Int.toString ints)) ^ "]"
 
 (* fresh creates a "fresh" name for the given string
    by adding a "." followed by a unique number.
