@@ -106,7 +106,7 @@ datatype sexp = Int of int
               (case stringArray strs (width - 1) of
 		 [] => ["()"]
 	       | str1 :: strs => 
-		      ("(" ^ str1)
+		      ("(" ^ (if str1 = "*" then " *" else str1)) (* [2020/12/14, lyn] treat * specially after "(" *)
 		      :: (List.map (prefix 1) strs)) (* stringArray adds ")" after final elt *)
 	      else 
                    (* Resort to shape 
@@ -132,7 +132,8 @@ datatype sexp = Int of int
          (* everything fits on one line. The "3" accounts
             for initial '(', the ' ' between s1 and rest1
             (if rest1 is non-empty) and the final ')' *)
-         ["(" ^ (String.concatWith " " (s1::rest1)) ^ ")"]
+         ["(" ^ (String.concatWith " " ((if s1 = "*" then " *" else s1)::rest1)) ^ ")"]
+         (* [2020/12/14, lyn] treat * specially after "(" *)
        else          
            let val initial = len1 + 2 (* account for "(" and " ") *)
 	   in
@@ -146,7 +147,8 @@ datatype sexp = Int of int
 		   (case stringArray rest1 (width - initial) of
 			  [] => ["(" ^ s1 ^ ")"]
 		   | str1 :: strs => 
-		     ("(" ^ s1 ^ " " ^ str1)
+		     ("(" ^ (if s1 = "*" then " *" else s1) ^ " " ^ str1)
+		     (* [2020/12/14, lyn] treat * specially after "(" *)
 		     :: (List.map (prefix initial) strs)) (* stringArray adds ")" after final elt *)
                else if (initial + (maxLen rest1)) <= width then 
          (* everything fits into shape 
@@ -159,7 +161,8 @@ datatype sexp = Int of int
           (case rest1 of
              [] => ["(" ^ s1 ^ ")"]
            | (str1 :: strs) => 
-                ("(" ^ s1 ^ " " ^ str1)
+                ("(" ^ (if s1 = "*" then " *" else s1) ^ " " ^ str1)
+		(* [2020/12/14, lyn] treat * specially after "(" *)
                 :: (List.map (prefix initial) (* 1 for '(', 1 for ' ' *)  
                              (strs @ [")"])))
         else (* must resort to shape 
@@ -213,7 +216,7 @@ datatype sexp = Int of int
     case strings of
       [] => ["()"]
     | (fst :: rst) => 
-        ("(" ^ fst) :: 
+        ("(" ^ (if fst = "*" then " *" else fst)) :: (* [2020/12/14, lyn] treat * specially after "(" *)
         ((List.map (fn s => " " ^ s) rst)
          @ [" )"])
 
